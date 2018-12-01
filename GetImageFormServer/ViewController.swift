@@ -10,13 +10,14 @@ import UIKit
 
 class ViewController: UIViewController,UICollectionViewDelegate,UICollectionViewDataSource {
    
+    
     @IBOutlet weak var imageCollectionView: UICollectionView!
     
     var appDataArray = NSMutableArray()
    
     override func viewDidLoad() {
         super.viewDidLoad()
-        let  urlString = "https://rss.itunes.apple.com/api/v1/us/ios-apps/top-free/all/5/explicit.json"
+        let  urlString = "https://rss.itunes.apple.com/api/v1/in/ios-apps/top-free/all/5/explicit.json"
         getAppDetails(AppStoreURL: urlString, onSuccess:{ (data) in
             if let recievedData = data as? NSArray {
                 if recievedData.count > 0 {
@@ -55,7 +56,7 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = imageCollectionView.dequeueReusableCell(withReuseIdentifier: "ImageCell", for: indexPath) as! ImageCollectionViewCell
         if  let appDict = self.appDataArray.object(at: indexPath.row) as? NSDictionary {
-            cell.appName.text = appDict.value(forKey: "artistName") as? String
+            cell.appName.text = appDict.value(forKey: "name") as? String
             let  imageUrl = URL(string: appDict.value(forKey: "artworkUrl100") as! String)
                         DispatchQueue.global().async {
                             let data = try? Data(contentsOf: imageUrl!)
@@ -75,13 +76,36 @@ class ViewController: UIViewController,UICollectionViewDelegate,UICollectionView
     
     
     @IBAction func tapOnNext(_ sender: UIButton) {
+        let visibleItems: NSArray = self.imageCollectionView.indexPathsForVisibleItems as NSArray
+        let currentItem: IndexPath = visibleItems.object(at: 0) as! IndexPath
+        let nextItem: IndexPath = IndexPath(item: currentItem.item + 1, section: 0)
        
-        UIButton.animate(withDuration: 0.2,
-                         animations: {
-                            sender.frame.origin.x = 270
-        })
+        if nextItem.row < appDataArray.count {
+            self.imageCollectionView.scrollToItem(at: nextItem , at: .left, animated: true)
+        } else {
+            sender.alpha = 0.3
+         sender.isEnabled = false
+        }
+        
+        
+//        UIButton.animate(withDuration: 0.2,
+//                         animations: {
+//                            sender.frame.origin.x = 270
+//        })
         
 
+    }
+    @IBAction func tapOnPrev(_ sender: UIButton) {
+        let visibleItems: NSArray = self.imageCollectionView.indexPathsForVisibleItems as NSArray
+        let currentItem: IndexPath = visibleItems.object(at: 0) as! IndexPath
+        let nextItem: IndexPath = IndexPath(item: currentItem.item - 1, section: 0)
+        
+        if nextItem.row < appDataArray.count {
+            self.imageCollectionView.scrollToItem(at: nextItem , at: .right, animated: true)
+        } else {
+            sender.alpha = 0.3
+            sender.isEnabled = false
+        }
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
